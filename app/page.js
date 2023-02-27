@@ -1,91 +1,59 @@
+"use client"
+
 import Image from 'next/image'
 import { Inter } from 'next/font/google'
 import styles from './page.module.css'
-
-const inter = Inter({ subsets: ['latin'] })
+import FeedbackMessage from '@/Components/FeedbackMessage/FeedbackMessage'
+import { use, useEffect, useState } from 'react'
+import dataset from '@/public/dataset'
+import { useRouter } from 'next/navigation'
 
 export default function Home() {
-  return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>app/page.js</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+  const [modalStatus, setModalStatus] = useState(false)
+  const [endStatus, setEndStatus] = useState(false)
+  const [currentQuestion, setCurrentQuestion] = useState()
+  const randomizedArray = dataset.slice()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (endStatus) {
+      setTimeout(() => router.push("/Results"), 3000)
+    }
+  }, [endStatus])
+
+  useEffect(() => {
+    setCurrentQuestion(randomizeData())
+    setEndStatus(false)
+  }, [])
+
+  const handleClick = () => {
+    setCurrentQuestion(randomizeData())
+    setModalStatus(true)
+    setTimeout(() => { setModalStatus(false) }, 3000)
+  }
+
+  function randomizeData() {
+    const randomIndex = Math.floor(Math.random() * randomizedArray.length)
+    const object = randomizedArray.splice(randomIndex, 1)
+    if (randomizedArray.length === 0) {
+      setEndStatus(true)
+    }
+    return object
+  }
+  
+  if (currentQuestion) {
+    return (
+      <>
+        {console.log("HERE: ", randomizeData())}
+        {modalStatus && <FeedbackMessage />}
+        <h1>Blueberry or Chihuahua?</h1>
+        <Image src={currentQuestion.source} width="300" height="300" />
+        <div className={styles.buttonContainer}>
+          <button onClick={handleClick}>Blueberry</button>
+          <button onClick={handleClick}>Chihuahua</button>
+          <button onClick={() => setEndStatus(true)}>Test</button>
         </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-        <div className={styles.thirteen}>
-          <Image src="/thirteen.svg" alt="13" width={40} height={31} priority />
-        </div>
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://beta.nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={inter.className}>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p className={inter.className}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={inter.className}>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p className={inter.className}>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={inter.className}>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p className={inter.className}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+      </>
+    )
+  }
 }

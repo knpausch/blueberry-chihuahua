@@ -1,7 +1,16 @@
+.image {
+  height: 400px;
+  width: 500px;
+  border-style: dashed;
+}
+
+.buttonContainer{
+  display: flex;
+}
+
 .main {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   align-items: center;
   padding: 6rem;
   min-height: 100vh;
