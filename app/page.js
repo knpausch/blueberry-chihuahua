@@ -11,47 +11,53 @@ import { useRouter } from 'next/navigation'
 export default function Home() {
   const [modalStatus, setModalStatus] = useState(false)
   const [endStatus, setEndStatus] = useState(false)
-  const [currentQuestion, setCurrentQuestion] = useState()
-  const randomizedArray = dataset.slice()
+  const [randomizedArray, setRandomizedArray] = useState([])
+  const [currentQuestion, setCurrentQuestion] = useState(0)
+  const [score, setScore] = useState(0)
   const router = useRouter()
-
+  
   useEffect(() => {
-    if (endStatus) {
-      setTimeout(() => router.push("/Results"), 3000)
-    }
-  }, [endStatus])
-
-  useEffect(() => {
-    setCurrentQuestion(randomizeData())
-    setEndStatus(false)
+    setRandomizedArray(randomizeData(dataset))
   }, [])
 
-  const handleClick = () => {
-    setCurrentQuestion(randomizeData())
+  useEffect(() => {
+    if (currentQuestion === randomizedArray.length-1) {
+      setTimeout(() => router.push(`/Results/${score}`), 500)
+    }
+  }, [currentQuestion])
+
+
+  const handleClick = (event) => {
+    if(event.target.value === randomizedArray[currentQuestion].answer){
+      setScore(prevState => prevState +1)
+    }
+
     setModalStatus(true)
-    setTimeout(() => { setModalStatus(false) }, 3000)
+    setTimeout(() => { setModalStatus(false) }, 500)
+    setTimeout(() => { setCurrentQuestion(prevState => prevState + 1) }, 500)
   }
 
-  function randomizeData() {
-    const randomIndex = Math.floor(Math.random() * randomizedArray.length)
-    const object = randomizedArray.splice(randomIndex, 1)
-    if (randomizedArray.length === 0) {
-      setEndStatus(true)
+  function randomizeData(array) {
+    const arrayCopy = array.slice()
+    const randomArray = []
+    while (arrayCopy.length > 0) {
+      const randomIndex = Math.floor(Math.random() * arrayCopy.length)
+      const object = arrayCopy.splice(randomIndex, 1)
+      randomArray.push(object[0])
     }
-    return object
+    return randomArray
   }
-  
-  if (currentQuestion) {
+
+  if(randomizedArray.length && currentQuestion <= 15){
     return (
       <>
-        {console.log("HERE: ", randomizeData())}
         {modalStatus && <FeedbackMessage />}
         <h1>Blueberry or Chihuahua?</h1>
-        <Image src={currentQuestion.source} width="300" height="300" />
+        <h2>Score: {score}/16</h2>
+        <Image src={randomizedArray[currentQuestion].source} width="400" height="400" alt="looks like a blueberry muffin or chihuahua" />
         <div className={styles.buttonContainer}>
-          <button onClick={handleClick}>Blueberry</button>
-          <button onClick={handleClick}>Chihuahua</button>
-          <button onClick={() => setEndStatus(true)}>Test</button>
+          <button value="blueberry muffin" onClick={(event) => handleClick(event)}>Blueberry Muffin</button>
+          <button value="chihuahua" onClick={(event) => handleClick(event)}>Chihuahua</button>
         </div>
       </>
     )
